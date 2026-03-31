@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -33,10 +33,11 @@ export default function Transactions() {
   const { members, hasTeam } = useMyTeamMembers();
 
   // Debounce search
+  const searchTimerRef = useRef<number>(0);
   const handleSearchChange = (val: string) => {
     setSearch(val);
-    clearTimeout((window as unknown as Record<string, number>).__searchTimer);
-    (window as unknown as Record<string, number>).__searchTimer = window.setTimeout(() => {
+    clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = window.setTimeout(() => {
       setSearchDebounced(val);
       setPage(1);
     }, 400);

@@ -14,11 +14,20 @@ router = APIRouter(prefix="/analytics", tags=["analytics"])
 async def _resolve_team_ids(db, user: "CurrentUser", user_id: UUID | None) -> list[UUID] | None:
     """Return team_user_ids list for analytics filtering.
 
-    If a specific user_id is given, return None (single-user filter in service).
+    If a specific user_id is given, verify the caller has access, then return None
+    (single-user filter in service).
     Otherwise, return all team member IDs so analytics aggregate across the team.
     """
     if user_id is not None:
-        return None
+        if user_id == user.id:
+            return None  # Self — no team filter needed
+        # Verify user_id is a teammate
+        team_ids = await get_team_user_ids(db, user.id)
+        if user_id not in team_ids:
+            from app.utils.exceptions import PermissionDeniedError
+
+            raise PermissionDeniedError("Cannot view this user's data")
+        return None  # Specific user filter, no team aggregation
     team_ids = await get_team_user_ids(db, user.id)
     # Only pass team list if user is actually in a team (more than just themselves)
     return team_ids if len(team_ids) > 1 else None

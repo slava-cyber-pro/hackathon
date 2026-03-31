@@ -36,7 +36,7 @@ export function useCurrency() {
           setRates(normalized, names);
         }
       })
-      .catch(() => {})
+      .catch((err) => { console.warn("Currency rates fetch failed:", err); })
       .finally(() => setLoading(false));
   }, [lastFetched, loading, setLoading, setRates]);
 

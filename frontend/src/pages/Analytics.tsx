@@ -8,6 +8,7 @@ import BalanceAreaChart from "@/components/charts/BalanceAreaChart";
 import InvestmentAllocationChart from "@/components/charts/InvestmentAllocationChart";
 import { useFormatCurrency } from "@/hooks/useFormatCurrency";
 import { cn } from "@/utils/cn";
+import { CHART_COLORS, INVESTMENT_CATEGORY_COLORS } from "@/utils/constants";
 import { useCategories } from "@/hooks/useCategories";
 import { useInvestments } from "@/hooks/useInvestments";
 import {
@@ -17,15 +18,9 @@ import {
   useInvestmentSummary,
 } from "@/hooks/useAnalytics";
 
-const COLORS = [
-  "#6366f1", "#14b8a6", "#f59e0b", "#f43f5e", "#8b5cf6",
-  "#ec4899", "#10b981", "#64748b", "#06b6d4", "#84cc16",
-];
+const COLORS = CHART_COLORS;
 
-const INV_COLORS: Record<string, string> = {
-  stocks: "#6366f1", bonds: "#14b8a6", crypto: "#f43f5e",
-  real_estate: "#f59e0b", mutual_funds: "#8b5cf6", etfs: "#10b981", custom: "#64748b",
-};
+const INV_COLORS: Record<string, string> = INVESTMENT_CATEGORY_COLORS;
 
 function Analytics() {
   const formatCurrency = useFormatCurrency();

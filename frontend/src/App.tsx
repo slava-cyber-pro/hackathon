@@ -5,6 +5,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { getMe } from "@/api/auth";
 import AppLayout from "@/components/layout/AppLayout";
 import AuthGuard from "@/components/layout/AuthGuard";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
 
 const Login = lazy(() => import("@/pages/Login"));
 const Register = lazy(() => import("@/pages/Register"));
@@ -45,31 +46,33 @@ function App() {
   }, [isAuthenticated, user, setUser, logout]);
 
   return (
-    <BrowserRouter>
-      <Suspense fallback={<Loading />}>
-        <Routes>
-          <Route
-            path="/login"
-            element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
-          />
-          <Route
-            path="/register"
-            element={isAuthenticated ? <Navigate to="/" replace /> : <Register />}
-          />
-          <Route element={<AuthGuard />}>
-            <Route element={<AppLayout />}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/transactions" element={<Transactions />} />
-              <Route path="/investments" element={<Investments />} />
-              <Route path="/budgets" element={<Budgets />} />
-              <Route path="/team" element={<Team />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/settings" element={<Settings />} />
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route
+              path="/login"
+              element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
+            />
+            <Route
+              path="/register"
+              element={isAuthenticated ? <Navigate to="/" replace /> : <Register />}
+            />
+            <Route element={<AuthGuard />}>
+              <Route element={<AppLayout />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/transactions" element={<Transactions />} />
+                <Route path="/investments" element={<Investments />} />
+                <Route path="/budgets" element={<Budgets />} />
+                <Route path="/team" element={<Team />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/settings" element={<Settings />} />
+              </Route>
             </Route>
-          </Route>
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

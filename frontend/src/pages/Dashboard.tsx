@@ -12,11 +12,9 @@ import { useCategories } from "@/hooks/useCategories";
 import { useBudgets } from "@/hooks/useBudgets";
 import { useSpendingByCategory, useIncomeVsExpenses, useInvestmentSummary } from "@/hooks/useAnalytics";
 import { useMyTeamMembers } from "@/hooks/useTeamMembers";
+import { CHART_COLORS } from "@/utils/constants";
 
-const COLORS = [
-  "#6366f1", "#f43f5e", "#f59e0b", "#14b8a6", "#8b5cf6",
-  "#64748b", "#ec4899", "#06b6d4", "#84cc16", "#ef4444",
-];
+const COLORS = CHART_COLORS;
 
 const NoData = ({ msg = "No data yet" }: { msg?: string }) => (
   <p className="py-12 text-center text-sm text-gray-400">{msg}</p>

@@ -16,7 +16,7 @@ from app.services.team_service import get_team_user_ids
 from app.utils.exceptions import NotFoundError, PermissionDeniedError
 
 
-async def _compute_spent(
+async def compute_spent(
     db: AsyncSession, user_ids: list[UUID], category_id: UUID | None, period_start, period_end,
 ) -> Decimal:
     query = (
@@ -75,7 +75,7 @@ async def get_budgets(db: AsyncSession, user_id: UUID) -> list[dict]:
             spent_user_ids = team_user_ids
         else:
             spent_user_ids = [budget.user_id] if budget.user_id else [user_id]
-        spent = await _compute_spent(
+        spent = await compute_spent(
             db, spent_user_ids, budget.category_id, budget.period_start, budget.period_end,
         )
         cat = cat_map.get(budget.category_id) if budget.category_id else None
