@@ -1,0 +1,148 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "title": "User Registrations",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "green" } } },
+      "targets": [
+        { "expr": "budgetsphere_users_registered_total", "legendFormat": "total" }
+      ]
+    },
+    {
+      "title": "Logins (success/fail)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        { "expr": "budgetsphere_logins_total{status=\"success\"}", "legendFormat": "success" },
+        { "expr": "budgetsphere_logins_total{status=\"failure\"}", "legendFormat": "failure" }
+      ]
+    },
+    {
+      "title": "Transactions Created",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "sum(budgetsphere_transactions_created_total)", "legendFormat": "total" }
+      ]
+    },
+    {
+      "title": "Teams Created",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        { "expr": "budgetsphere_teams_created_total", "legendFormat": "total" }
+      ]
+    },
+    {
+      "title": "Registration Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "fieldConfig": { "defaults": { "unit": "ops" } },
+      "targets": [
+        {
+          "expr": "rate(budgetsphere_users_registered_total[5m])",
+          "legendFormat": "registrations/s"
+        }
+      ]
+    },
+    {
+      "title": "Login Success vs Failure Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "fieldConfig": { "defaults": { "unit": "ops" } },
+      "targets": [
+        {
+          "expr": "rate(budgetsphere_logins_total{status=\"success\"}[5m])",
+          "legendFormat": "success/s"
+        },
+        {
+          "expr": "rate(budgetsphere_logins_total{status=\"failure\"}[5m])",
+          "legendFormat": "failure/s"
+        }
+      ]
+    },
+    {
+      "title": "Transactions by Type",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "fieldConfig": { "defaults": { "unit": "ops" } },
+      "targets": [
+        {
+          "expr": "rate(budgetsphere_transactions_created_total{type=\"income\"}[5m])",
+          "legendFormat": "income/s"
+        },
+        {
+          "expr": "rate(budgetsphere_transactions_created_total{type=\"expense\"}[5m])",
+          "legendFormat": "expense/s"
+        }
+      ]
+    },
+    {
+      "title": "Investments by Category",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "fieldConfig": { "defaults": { "unit": "ops" } },
+      "targets": [
+        {
+          "expr": "rate(budgetsphere_investments_created_total[5m])",
+          "legendFormat": "{{category}}/s"
+        }
+      ]
+    },
+    {
+      "title": "Failed Login Ratio",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 20 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.1 },
+              { "color": "red", "value": 0.3 }
+            ]
+          },
+          "max": 1
+        }
+      },
+      "targets": [
+        {
+          "expr": "budgetsphere_logins_total{status=\"failure\"} / (budgetsphere_logins_total{status=\"success\"} + budgetsphere_logins_total{status=\"failure\"})",
+          "legendFormat": "failure ratio"
+        }
+      ]
+    },
+    {
+      "title": "Transaction Totals (all time)",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 20 },
+      "targets": [
+        {
+          "expr": "budgetsphere_transactions_created_total",
+          "legendFormat": "{{type}}"
+        }
+      ]
+    },
+    {
+      "title": "Investment Totals by Category",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 20 },
+      "targets": [
+        {
+          "expr": "budgetsphere_investments_created_total",
+          "legendFormat": "{{category}}"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["budgetsphere", "business"],
+  "time": { "from": "now-24h", "to": "now" },
+  "title": "BudgetSphere — Business Metrics",
+  "uid": "budgetsphere-business"
+}

@@ -1,0 +1,79 @@
+{
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "title": "All Service Logs",
+      "type": "logs",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 0 },
+      "datasource": "Loki",
+      "targets": [
+        { "expr": "{service=~\"backend|frontend|telegram-bot|db|redis\"}", "refId": "A" }
+      ],
+      "options": {
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true,
+        "enableLogDetails": true
+      }
+    },
+    {
+      "title": "Backend Logs",
+      "type": "logs",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 12 },
+      "datasource": "Loki",
+      "targets": [
+        { "expr": "{service=\"backend\"}", "refId": "A" }
+      ],
+      "options": { "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true }
+    },
+    {
+      "title": "Telegram Bot Logs",
+      "type": "logs",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 12 },
+      "datasource": "Loki",
+      "targets": [
+        { "expr": "{service=\"telegram-bot\"}", "refId": "A" }
+      ],
+      "options": { "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true }
+    },
+    {
+      "title": "Database Logs",
+      "type": "logs",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 22 },
+      "datasource": "Loki",
+      "targets": [
+        { "expr": "{service=\"db\"}", "refId": "A" }
+      ],
+      "options": { "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true }
+    },
+    {
+      "title": "Error Logs (all services)",
+      "type": "logs",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 22 },
+      "datasource": "Loki",
+      "targets": [
+        { "expr": "{service=~\"backend|frontend|telegram-bot|db|redis\"} |~ \"(?i)(error|exception|traceback|fail)\"", "refId": "A" }
+      ],
+      "options": { "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true }
+    },
+    {
+      "title": "Log Volume by Service",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 32 },
+      "datasource": "Loki",
+      "targets": [
+        {
+          "expr": "sum(rate({service=~\"backend|frontend|telegram-bot|db|redis\"}[5m])) by (service)",
+          "legendFormat": "{{service}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["budgetsphere", "logs"],
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "BudgetSphere — Logs",
+  "uid": "budgetsphere-logs"
+}

@@ -1,0 +1,87 @@
+groups:
+  - name: availability
+    rules:
+      - alert: ServiceDown
+        expr: up{job="budgetsphere-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backend is down"
+          description: "Cannot scrape backend for > 1 minute"
+
+      - alert: HighErrorRate
+        expr: >
+          sum(rate(http_request_duration_seconds_count{job="budgetsphere-backend", status=~"5.."}[5m]))
+          / sum(rate(http_request_duration_seconds_count{job="budgetsphere-backend"}[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "5xx error rate > 5%"
+          description: "Error rate is {{ $value | humanizePercentage }}"
+
+  - name: performance
+    rules:
+      - alert: HighLatencyP95
+        expr: >
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="budgetsphere-backend"}[5m])) by (le)
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "p95 latency > 500ms"
+          description: "p95 latency is {{ $value }}s"
+
+      - alert: HighLatencyP99
+        expr: >
+          histogram_quantile(0.99,
+            sum(rate(http_request_duration_seconds_bucket{job="budgetsphere-backend"}[5m])) by (le)
+          ) > 2
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "p99 latency > 2s"
+
+  - name: security
+    rules:
+      - alert: HighFailedLogins
+        expr: rate(budgetsphere_logins_total{status="failure"}[5m]) > 1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High failed login rate (> 1/s)"
+          description: "Possible brute force — {{ $value }} failed logins/s"
+
+      - alert: FailedLoginRatioHigh
+        expr: >
+          budgetsphere_logins_total{status="failure"}
+          / (budgetsphere_logins_total{status="success"} + budgetsphere_logins_total{status="failure"}) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Failed login ratio > 50%"
+
+  - name: business
+    rules:
+      - alert: NoTransactionsCreated
+        expr: rate(budgetsphere_transactions_created_total[1h]) == 0
+        for: 24h
+        labels:
+          severity: info
+        annotations:
+          summary: "No transactions created in 24h"
+          description: "Application may be unused or broken"
+
+      - alert: NoUserRegistrations
+        expr: increase(budgetsphere_users_registered_total[24h]) == 0
+        for: 48h
+        labels:
+          severity: info
+        annotations:
+          summary: "No new registrations in 48h"

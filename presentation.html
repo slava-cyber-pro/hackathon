@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BudgetSphere — Hackathon Presentation</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0f172a;
+    --bg-card: rgba(255,255,255,0.04);
+    --bg-card-hover: rgba(255,255,255,0.07);
+    --teal: #0d9488;
+    --teal-light: #14b8a6;
+    --teal-glow: rgba(13,148,136,0.25);
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --text-muted: #64748b;
+    --accent-gradient: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
+    --slide-transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @font-face {
+    font-family: 'Inter';
+    src: local('Inter'), local('Inter-Regular');
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Slide deck container */
+  .deck {
+    width: 100vw; height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    background: linear-gradient(160deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  }
+
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* Slide counter */
+  .counter {
+    position: fixed;
+    bottom: 28px;
+    right: 40px;
+    font-size: 14px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    z-index: 100;
+    letter-spacing: 0.5px;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--accent-gradient);
+    z-index: 100;
+    transition: width 0.4s ease;
+    box-shadow: 0 0 12px var(--teal-glow);
+  }
+
+  /* Nav hint */
+  .nav-hint {
+    position: fixed;
+    bottom: 28px;
+    left: 40px;
+    font-size: 12px;
+    color: var(--text-muted);
+    z-index: 100;
+    opacity: 0.6;
+  }
+
+  /* ===== Typography ===== */
+  h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 1.35rem;
+    color: var(--text-dim);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  .tagline {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-top: 12px;
+    font-weight: 400;
+  }
+
+  .teal { color: var(--teal-light); }
+
+  .gradient-text {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ===== Cards ===== */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 28px 24px;
+    transition: background 0.3s, border-color 0.3s;
+    backdrop-filter: blur(8px);
+  }
+
+  .card:hover {
+    background: var(--bg-card-hover);
+    border-color: rgba(13,148,136,0.2);
+  }
+
+  /* ===== Screenshot styling ===== */
+  .screenshot {
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+    max-width: 100%;
+    max-height: 70vh;
+    height: auto;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+  }
+
+  .screenshot:hover {
+    transform: scale(1.02);
+  }
+
+  .screenshot-sm {
+    border-radius: 8px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+    max-width: 100%;
+    height: auto;
+    cursor: pointer;
+  }
+
+  /* ===== Fullscreen lightbox ===== */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.92);
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    cursor: zoom-out;
+  }
+  .lightbox.open {
+    display: flex;
+  }
+  .lightbox img {
+    max-width: 95vw;
+    max-height: 90vh;
+    border-radius: 12px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 32px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  .lightbox-close:hover { opacity: 1; }
+
+  /* ===== Grid helpers ===== */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    width: 100%;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    width: 100%;
+  }
+
+  .grid-4 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+  }
+
+  .grid-2x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 20px;
+    width: 100%;
+  }
+
+  .flex-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .w-full { width: 100%; }
+  .text-center { text-align: center; }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-24 { margin-top: 24px; }
+  .mt-32 { margin-top: 32px; }
+  .mt-40 { margin-top: 40px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-24 { margin-bottom: 24px; }
+  .mb-32 { margin-bottom: 32px; }
+  .gap-16 { gap: 16px; }
+  .gap-32 { gap: 32px; }
+
+  /* ===== Logo ===== */
+  .logo {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 32px;
+    box-shadow: 0 0 60px var(--teal-glow), 0 0 120px rgba(13,148,136,0.1);
+    position: relative;
+  }
+
+  .logo::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid rgba(13,148,136,0.3);
+    animation: pulse-ring 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.08); opacity: 0.5; }
+  }
+
+  /* ===== Pain point icons (SVG-free, CSS-only) ===== */
+  .icon-circle {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: rgba(13,148,136,0.12);
+    border: 1px solid rgba(13,148,136,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ===== Code block / terminal ===== */
+  .terminal {
+    background: #0c0e14;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 24px 28px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: #c9d1d9;
+    white-space: pre;
+    overflow-x: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  .terminal::before {
+    content: '';
+    position: absolute;
+    top: 12px; left: 16px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #ff5f57;
+    box-shadow: 20px 0 0 #febc2e, 40px 0 0 #28c840;
+  }
+
+  .terminal.has-dots {
+    padding-top: 44px;
+  }
+
+  .terminal .comment { color: #6a737d; }
+  .terminal .keyword { color: #14b8a6; }
+  .terminal .string { color: #a5d6ff; }
+  .terminal .dim { color: #484f58; }
+  .terminal .accent { color: #0d9488; font-weight: 600; }
+
+  /* ===== Big number ===== */
+  .big-number {
+    font-size: 6rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .big-number-md {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  /* ===== Stat pill ===== */
+  .stat-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px;
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .stat-pill .value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--teal-light);
+    letter-spacing: -0.02em;
+  }
+
+  .stat-pill .label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+
+  /* ===== Coverage bar ===== */
+  .coverage-bar-track {
+    width: 100%;
+    height: 12px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+
+  .coverage-bar-fill {
+    height: 100%;
+    background: var(--accent-gradient);
+    border-radius: 6px;
+    transition: width 1s ease;
+  }
+
+  /* ===== Highlight badge ===== */
+  .highlight-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    background: rgba(13,148,136,0.1);
+    border: 1px solid rgba(13,148,136,0.25);
+    border-radius: 100px;
+    font-size: 0.85rem;
+    color: var(--teal-light);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  /* ===== Dark mode corner preview ===== */
+  .corner-preview {
+    position: absolute;
+    bottom: 80px;
+    right: 80px;
+    width: 280px;
+    border-radius: 10px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08);
+    transition: transform 0.3s ease;
+  }
+
+  .corner-preview:hover {
+    transform: scale(1.05) translate(-8px, -8px);
+  }
+
+  .corner-label {
+    position: absolute;
+    bottom: 64px;
+    right: 80px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ===== Accent line ===== */
+  .accent-line {
+    width: 60px;
+    height: 3px;
+    background: var(--accent-gradient);
+    border-radius: 2px;
+    margin: 20px auto 0;
+  }
+
+  /* ===== Teal divider ===== */
+  .teal-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(13,148,136,0.3), transparent);
+    margin: 24px 0;
+  }
+
+  /* ===== Section label ===== */
+  .section-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--teal);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  /* ===== Screenshot with label ===== */
+  .screenshot-labeled {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .screenshot-labeled .label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ===== Code rules list ===== */
+  .rule-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .rule-list li {
+    padding: 8px 0;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    line-height: 1.5;
+  }
+
+  .rule-list li::before {
+    content: '>';
+    color: var(--teal);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ===== Stats grid for final slide ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .stats-grid .stat-pill .value {
+    font-size: 1.3rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- ========== SLIDE 1: Title ========== -->
+  <div class="slide active" data-slide="0">
+    <div class="flex-center">
+      <div class="logo">B</div>
+      <h1>Budget<span class="teal">Sphere</span></h1>
+      <p class="subtitle">Collaborative Financial Tracking PWA</p>
+      <p class="tagline">Built with Claude Code in one session</p>
+      <div class="accent-line"></div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 2: The Problem ========== -->
+  <div class="slide" data-slide="1">
+    <p class="section-label text-center">Why this matters</p>
+    <h2 class="text-center mb-32">The Problem</h2>
+    <div class="grid-4" style="max-width: 1100px;">
+      <div class="card flex-center text-center" style="padding: 32px 20px;">
+        <div class="icon-circle">
+          <span style="filter: grayscale(0.2);">&#128200;</span>
+        </div>
+        <h3>Scattered Finances</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+          Bank apps, spreadsheets, notes &mdash; data lives in 5 different places.
+        </p>
+      </div>
+      <div class="card flex-center text-center" style="padding: 32px 20px;">
+        <div class="icon-circle">
+          <span style="filter: grayscale(0.2);">&#128101;</span>
+        </div>
+        <h3>No Shared View</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+          Families and teams have zero collaborative visibility into spending.
+        </p>
+      </div>
+      <div class="card flex-center text-center" style="padding: 32px 20px;">
+        <div class="icon-circle">
+          <span style="filter: grayscale(0.2);">&#128176;</span>
+        </div>
+        <h3>Investments Apart</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+          Portfolio tracking is always a separate tool with separate logins.
+        </p>
+      </div>
+      <div class="card flex-center text-center" style="padding: 32px 20px;">
+        <div class="icon-circle">
+          <span style="filter: grayscale(0.2);">&#9889;</span>
+        </div>
+        <h3>No Quick-Add</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+          Adding a transaction takes too many taps, so people stop tracking.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 3: The Solution ========== -->
+  <div class="slide" data-slide="2">
+    <p class="section-label text-center">Our answer</p>
+    <h2 class="text-center mb-8">The Solution</h2>
+    <p class="subtitle text-center mb-32" style="max-width: 700px;">
+      One place for spending, income, investments, budgets, and team collaboration.
+    </p>
+    <div class="grid-3" style="max-width: 1200px;">
+      <div class="screenshot-labeled">
+        <img src="screenshots/03-dashboard.png" class="screenshot" alt="Dashboard" style="width: 100%;">
+        <span class="label">Dashboard</span>
+      </div>
+      <div class="screenshot-labeled">
+        <img src="screenshots/05-transactions.png" class="screenshot" alt="Transactions" style="width: 100%;">
+        <span class="label">Transactions</span>
+      </div>
+      <div class="screenshot-labeled">
+        <img src="screenshots/06-investments.png" class="screenshot" alt="Investments" style="width: 100%;">
+        <span class="label">Investments</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 4: Architecture ========== -->
+  <div class="slide" data-slide="3">
+    <p class="section-label text-center">Under the hood</p>
+    <h2 class="text-center mb-24">Architecture</h2>
+    <div class="terminal has-dots" style="max-width: 900px; width: 100%; font-size: 0.78rem; line-height: 1.65;">
+<span class="dim">                        BudgetSphere Architecture</span>
+<span class="dim">  ===================================================================</span>
+
+<span class="dim">  [Browser / PWA]</span>
+       <span class="dim">|</span>
+       <span class="dim">|</span> <span class="comment">HTTPS</span>
+       <span class="dim">v</span>
+  <span class="keyword">+------------------+</span>      <span class="keyword">+-------------------+</span>
+  <span class="keyword">|</span>  <span class="accent">React + Vite</span>    <span class="keyword">|</span>      <span class="keyword">|</span>  <span class="accent">Nginx</span>            <span class="keyword">|</span>
+  <span class="keyword">|</span>  TypeScript       <span class="keyword">|</span><span class="dim">---></span>  <span class="keyword">|</span>  Reverse Proxy     <span class="keyword">|</span>
+  <span class="keyword">|</span>  TanStack Query   <span class="keyword">|</span>      <span class="keyword">|</span>  Static Assets     <span class="keyword">|</span>
+  <span class="keyword">+------------------+</span>      <span class="keyword">+--------+----------+</span>
+                                     <span class="dim">|</span>
+                                     <span class="dim">v</span>
+                           <span class="keyword">+-------------------+</span>
+                           <span class="keyword">|</span>  <span class="accent">FastAPI</span>           <span class="keyword">|</span>
+                           <span class="keyword">|</span>  Async Python      <span class="keyword">|</span>
+                           <span class="keyword">|</span>  JWT Auth          <span class="keyword">|</span>
+                           <span class="keyword">+--------+----------+</span>
+                                    <span class="dim">|</span>
+                    <span class="dim">+---------------+---------------+</span>
+                    <span class="dim">|</span>               <span class="dim">|</span>               <span class="dim">|</span>
+                    <span class="dim">v</span>               <span class="dim">v</span>               <span class="dim">v</span>
+          <span class="keyword">+-----------+</span>  <span class="keyword">+-----------+</span>  <span class="keyword">+--------------+</span>
+          <span class="keyword">|</span><span class="accent">PostgreSQL</span> <span class="keyword">|</span>  <span class="keyword">|</span>  <span class="accent">Redis</span>    <span class="keyword">|</span>  <span class="keyword">|</span> <span class="accent">Prometheus</span>   <span class="keyword">|</span>
+          <span class="keyword">|</span> 9 Models  <span class="keyword">|</span>  <span class="keyword">|</span> Rate-Limit<span class="keyword">|</span>  <span class="keyword">|</span> + <span class="accent">Grafana</span>    <span class="keyword">|</span>
+          <span class="keyword">+-----------+</span>  <span class="keyword">+-----------+</span>  <span class="keyword">+--------------+</span>
+
+          <span class="keyword">+-----------+</span>
+          <span class="keyword">|</span><span class="accent">Telegram</span>   <span class="keyword">|</span>  <span class="comment"># Quick-add transactions via bot</span>
+          <span class="keyword">|</span> Bot       <span class="keyword">|</span>
+          <span class="keyword">+-----------+</span></div>
+    <div class="grid-3 mt-32" style="max-width: 600px;">
+      <div class="stat-pill">
+        <span class="value">10</span>
+        <span class="label">Docker Services</span>
+      </div>
+      <div class="stat-pill">
+        <span class="value">39</span>
+        <span class="label">API Endpoints</span>
+      </div>
+      <div class="stat-pill">
+        <span class="value">9</span>
+        <span class="label">DB Models</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 5: CLAUDE.md & Build Process ========== -->
+  <div class="slide" data-slide="4">
+    <p class="section-label text-center">How we built it</p>
+    <h2 class="text-center mb-24">CLAUDE.md &amp; Build Process</h2>
+    <div class="grid-2" style="max-width: 1100px; align-items: start;">
+      <div>
+        <div class="terminal has-dots" style="font-size: 0.72rem; line-height: 1.7; overflow-y: auto; max-height: 380px;">
+<span class="comment"># CLAUDE.md  &mdash;  key rules</span>
+
+<span class="keyword">## Code Principles</span>
+<span class="string">- Small functions: max ~20 lines</span>
+<span class="string">- One responsibility per file</span>
+<span class="string">- No business logic in routes</span>
+<span class="string">- Type everything: strict TS + Python hints</span>
+<span class="string">- Fail explicitly, never swallow errors</span>
+
+<span class="keyword">## Backend</span>
+<span class="string">- Async everything: routes, DB, Redis</span>
+<span class="string">- Stateless JWT auth (no token storage)</span>
+<span class="string">- Domain exceptions, not HTTPException</span>
+<span class="string">- Prometheus + structlog observability</span>
+
+<span class="keyword">## Frontend</span>
+<span class="string">- TanStack Query for server state</span>
+<span class="string">- Zustand for client state</span>
+<span class="string">- shadcn/ui + Tailwind CSS</span>
+<span class="string">- React Hook Form + Zod validation</span>
+
+<span class="keyword">## Testing</span>
+<span class="string">- Real DB, no mocks (backend)</span>
+<span class="string">- MSW for network mocking (frontend)</span>
+<span class="string">- Playwright for E2E</span>
+<span class="string">- Minimum 80% coverage enforced</span></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="card" style="display: flex; align-items: center; gap: 16px;">
+          <div class="icon-circle" style="margin-bottom: 0; flex-shrink: 0;">
+            <span>&#129302;</span>
+          </div>
+          <div>
+            <h3 style="margin-bottom: 2px;">4 Parallel Agents</h3>
+            <p style="font-size: 0.82rem; color: var(--text-muted);">
+              Backend services built simultaneously &mdash; auth, transactions, investments, teams.
+            </p>
+          </div>
+        </div>
+        <div class="card" style="display: flex; align-items: center; gap: 16px;">
+          <div class="icon-circle" style="margin-bottom: 0; flex-shrink: 0;">
+            <span>&#127912;</span>
+          </div>
+          <div>
+            <h3 style="margin-bottom: 2px;">30 Stitch Design Screens</h3>
+            <p style="font-size: 0.82rem; color: var(--text-muted);">
+              Every page designed in Stitch MCP first &mdash; mobile + desktop variants.
+            </p>
+          </div>
+        </div>
+        <div class="card" style="display: flex; align-items: center; gap: 16px;">
+          <div class="icon-circle" style="margin-bottom: 0; flex-shrink: 0;">
+            <span>&#128270;</span>
+          </div>
+          <div>
+            <h3 style="margin-bottom: 2px;">Test-First Approach</h3>
+            <p style="font-size: 0.82rem; color: var(--text-muted);">
+              228 tests across 3 frameworks ensure reliability from day one.
+            </p>
+          </div>
+        </div>
+        <div class="card" style="display: flex; align-items: center; gap: 16px;">
+          <div class="icon-circle" style="margin-bottom: 0; flex-shrink: 0;">
+            <span>&#128736;</span>
+          </div>
+          <div>
+            <h3 style="margin-bottom: 2px;">Single Session Build</h3>
+            <p style="font-size: 0.82rem; color: var(--text-muted);">
+              Entire project &mdash; backend, frontend, tests, Docker &mdash; in one Claude Code session.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 6: Dashboard ========== -->
+  <div class="slide" data-slide="5" style="padding: 40px 60px;">
+    <p class="section-label text-center">Live product</p>
+    <h2 class="text-center mb-24">Dashboard</h2>
+    <div style="position: relative; max-width: 1100px; width: 100%;">
+      <img src="screenshots/03-dashboard.png" class="screenshot" alt="Dashboard" style="width: 100%;">
+      <img src="screenshots/12-dashboard-dark.png" class="corner-preview" alt="Dashboard Dark Mode">
+      <span class="corner-label">Dark Mode</span>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 7: Transactions & Market ========== -->
+  <div class="slide" data-slide="6">
+    <p class="section-label text-center">Live product</p>
+    <h2 class="text-center mb-8">Transactions &amp; Market</h2>
+    <div class="highlight-badge mb-24">39 endpoints &middot; paginated &middot; filtered &middot; team-aware</div>
+    <div class="grid-2" style="max-width: 1100px;">
+      <div class="screenshot-labeled">
+        <img src="screenshots/05-transactions.png" class="screenshot" alt="Transactions" style="width: 100%;">
+        <span class="label">Transactions</span>
+      </div>
+      <div class="screenshot-labeled">
+        <img src="screenshots/07-market.png" class="screenshot" alt="Market" style="width: 100%;">
+        <span class="label">Market</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 8: Investments ========== -->
+  <div class="slide" data-slide="7">
+    <p class="section-label text-center">Live product</p>
+    <h2 class="text-center mb-8">Investments</h2>
+    <div class="highlight-badge mb-24">Live prices from yfinance + CoinGecko &middot; 60s auto-refresh &middot; sparkline charts</div>
+    <div class="grid-2" style="max-width: 1100px;">
+      <div class="screenshot-labeled">
+        <img src="screenshots/06-investments.png" class="screenshot" alt="Investments" style="width: 100%;">
+        <span class="label">Portfolio</span>
+      </div>
+      <div class="screenshot-labeled">
+        <img src="screenshots/14-market-dark.png" class="screenshot" alt="Market Dark" style="width: 100%;">
+        <span class="label">Market &mdash; Dark Mode</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 9: Team & Budgets ========== -->
+  <div class="slide" data-slide="8">
+    <p class="section-label text-center">Live product</p>
+    <h2 class="text-center mb-8">Team &amp; Budgets</h2>
+    <div class="highlight-badge mb-24">Role-based access &middot; shared data &middot; team budget limits</div>
+    <div class="grid-2" style="max-width: 1100px;">
+      <div class="screenshot-labeled">
+        <img src="screenshots/09-team.png" class="screenshot" alt="Team" style="width: 100%;">
+        <span class="label">Team Management</span>
+      </div>
+      <div class="screenshot-labeled">
+        <img src="screenshots/08-budgets.png" class="screenshot" alt="Budgets" style="width: 100%;">
+        <span class="label">Budgets</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 10: Mobile & Dark Mode ========== -->
+  <div class="slide" data-slide="9">
+    <p class="section-label text-center">Every screen, every device</p>
+    <h2 class="text-center mb-24">Mobile &amp; Dark Mode</h2>
+    <div class="grid-2x2" style="max-width: 1000px;">
+      <div class="screenshot-labeled">
+        <img src="screenshots/15-mobile-login.png" class="screenshot-sm" alt="Mobile Login" style="width: 100%; max-height: 320px; object-fit: contain;">
+        <span class="label">Mobile Login</span>
+      </div>
+      <div class="screenshot-labeled">
+        <img src="screenshots/16-mobile-dashboard.png" class="screenshot-sm" alt="Mobile Dashboard" style="width: 100%; max-height: 320px; object-fit: contain;">
+        <span class="label">Mobile Dashboard</span>
+      </div>
+      <div class="screenshot-labeled">
+        <img src="screenshots/12-dashboard-dark.png" class="screenshot-sm" alt="Dashboard Dark" style="width: 100%; max-height: 320px; object-fit: contain;">
+        <span class="label">Dashboard &mdash; Dark</span>
+      </div>
+      <div class="screenshot-labeled">
+        <img src="screenshots/13-transactions-dark.png" class="screenshot-sm" alt="Transactions Dark" style="width: 100%; max-height: 320px; object-fit: contain;">
+        <span class="label">Transactions &mdash; Dark</span>
+      </div>
+    </div>
+    <div class="highlight-badge mt-24">PWA-ready &middot; fully responsive &middot; dark mode</div>
+  </div>
+
+  <!-- ========== SLIDE 11: Testing & Reliability ========== -->
+  <div class="slide" data-slide="10">
+    <p class="section-label text-center">Quality assurance</p>
+    <h2 class="text-center mb-32">Testing &amp; Reliability</h2>
+    <div class="big-number gradient-text text-center">228</div>
+    <p class="subtitle text-center mt-8 mb-32">Tests Passing</p>
+    <div class="grid-3" style="max-width: 750px;">
+      <div class="card text-center" style="padding: 24px 16px;">
+        <div class="big-number-md teal">108</div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">Backend<br><span style="font-size: 0.75rem;">pytest + async</span></p>
+      </div>
+      <div class="card text-center" style="padding: 24px 16px;">
+        <div class="big-number-md teal">101</div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">Frontend<br><span style="font-size: 0.75rem;">Vitest + RTL</span></p>
+      </div>
+      <div class="card text-center" style="padding: 24px 16px;">
+        <div class="big-number-md teal">19</div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">E2E<br><span style="font-size: 0.75rem;">Playwright</span></p>
+      </div>
+    </div>
+    <div style="max-width: 750px; width: 100%; margin-top: 28px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-size: 0.82rem; color: var(--text-dim);">Code Coverage</span>
+        <span style="font-size: 0.82rem; color: var(--teal-light); font-weight: 600;">80%+</span>
+      </div>
+      <div class="coverage-bar-track">
+        <div class="coverage-bar-fill" style="width: 83%;"></div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 16px; margin-top: 24px; flex-wrap: wrap; justify-content: center;">
+      <span class="highlight-badge" style="font-size: 0.78rem; padding: 6px 14px;">Security Audit</span>
+      <span class="highlight-badge" style="font-size: 0.78rem; padding: 6px 14px;">Rate Limiting</span>
+      <span class="highlight-badge" style="font-size: 0.78rem; padding: 6px 14px;">Input Validation</span>
+      <span class="highlight-badge" style="font-size: 0.78rem; padding: 6px 14px;">JWT + RBAC</span>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 12: Observability — Grafana + Prometheus ========== -->
+  <div class="slide" data-slide="11">
+    <h2 style="margin-bottom: 8px;">Observability</h2>
+    <p class="subtitle" style="margin-bottom: 30px;">Prometheus + Grafana + Loki — metrics, dashboards, logs, and alerts</p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; width: 100%; max-width: 1200px;">
+      <div style="text-align: center;">
+        <img src="screenshots/20-grafana-api.png" class="screenshot" alt="Grafana API Performance" style="width: 100%;">
+        <p style="margin-top: 8px; font-size: 0.85rem; color: var(--text-dim);">API Performance</p>
+      </div>
+      <div style="text-align: center;">
+        <img src="screenshots/21-grafana-business.png" class="screenshot" alt="Grafana Business Metrics" style="width: 100%;">
+        <p style="margin-top: 8px; font-size: 0.85rem; color: var(--text-dim);">Business Metrics</p>
+      </div>
+      <div style="text-align: center;">
+        <img src="screenshots/22-grafana-logs.png" class="screenshot" alt="Grafana Logs" style="width: 100%;">
+        <p style="margin-top: 8px; font-size: 0.85rem; color: var(--text-dim);">Logs (Loki)</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 24px; margin-top: 30px; flex-wrap: wrap; justify-content: center;">
+      <div class="card" style="text-align: center; padding: 16px 24px;">
+        <div style="font-size: 1.8rem; font-weight: 700; color: var(--teal-light);">8</div>
+        <div style="font-size: 0.8rem; color: var(--text-dim);">Alert Rules</div>
+      </div>
+      <div class="card" style="text-align: center; padding: 16px 24px;">
+        <div style="font-size: 1.8rem; font-weight: 700; color: var(--teal-light);">3</div>
+        <div style="font-size: 0.8rem; color: var(--text-dim);">Dashboards</div>
+      </div>
+      <div class="card" style="text-align: center; padding: 16px 24px;">
+        <div style="font-size: 1.8rem; font-weight: 700; color: var(--teal-light);">10</div>
+        <div style="font-size: 0.8rem; color: var(--text-dim);">Services Monitored</div>
+      </div>
+      <div class="card" style="text-align: center; padding: 16px 24px;">
+        <div style="font-size: 1.8rem; font-weight: 700; color: var(--teal-light);">5</div>
+        <div style="font-size: 0.8rem; color: var(--text-dim);">Custom Metrics</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 13: Stats & Thank You ========== -->
+  <div class="slide" data-slide="12">
+    <div class="flex-center" style="gap: 0;">
+      <div class="logo" style="width: 72px; height: 72px; font-size: 2.2rem; margin-bottom: 20px;">B</div>
+      <h1 class="text-center">Budget<span class="teal">Sphere</span></h1>
+      <p class="subtitle text-center mb-32">By the numbers</p>
+      <div class="stats-grid">
+        <div class="stat-pill">
+          <span class="value">11,400+</span>
+          <span class="label">Lines of Code</span>
+        </div>
+        <div class="stat-pill">
+          <span class="value">39</span>
+          <span class="label">API Endpoints</span>
+        </div>
+        <div class="stat-pill">
+          <span class="value">228</span>
+          <span class="label">Tests</span>
+        </div>
+        <div class="stat-pill">
+          <span class="value">10</span>
+          <span class="label">Docker Services</span>
+        </div>
+        <div class="stat-pill">
+          <span class="value">35</span>
+          <span class="label">React Components</span>
+        </div>
+        <div class="stat-pill">
+          <span class="value">10</span>
+          <span class="label">Pages</span>
+        </div>
+        <div class="stat-pill">
+          <span class="value">9</span>
+          <span class="label">DB Models</span>
+        </div>
+        <div class="stat-pill">
+          <span class="value">16</span>
+          <span class="label">Currency Support</span>
+        </div>
+        <div class="stat-pill">
+          <span class="value" style="font-size: 1.1rem;">Telegram</span>
+          <span class="label">Bot Integration</span>
+        </div>
+      </div>
+      <div class="teal-divider" style="max-width: 400px; margin-top: 36px;"></div>
+      <p style="font-size: 0.95rem; color: var(--text-dim); margin-top: 20px; font-weight: 500;">
+        Built with <span class="teal" style="font-weight: 700;">Claude Code</span>
+      </p>
+      <div class="accent-line" style="margin-top: 12px;"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Counter -->
+<div class="counter" id="counter">1 / 13</div>
+
+<!-- Progress bar -->
+<div class="progress-bar" id="progress" style="width: 8.33%;"></div>
+
+<!-- Nav hint -->
+<div class="nav-hint" id="navHint">&larr; &rarr; arrow keys to navigate</div>
+
+<!-- Lightbox overlay -->
+<div class="lightbox" id="lightbox">
+  <span class="lightbox-close">&times;</span>
+  <img id="lightbox-img" src="" alt="Fullscreen preview">
+</div>
+
+<script>
+(function() {
+  var current = 0;
+  var slides = document.querySelectorAll('.slide');
+  var total = slides.length;
+  var counter = document.getElementById('counter');
+  var progress = document.getElementById('progress');
+  var navHint = document.getElementById('navHint');
+  var hintHidden = false;
+
+  function show(index) {
+    if (index < 0 || index >= total) return;
+    for (var i = 0; i < total; i++) {
+      slides[i].classList.remove('active');
+    }
+    slides[index].classList.add('active');
+    current = index;
+    counter.textContent = (current + 1) + ' / ' + total;
+    progress.style.width = ((current + 1) / total * 100) + '%';
+    if (!hintHidden) {
+      hintHidden = true;
+      navHint.style.transition = 'opacity 1s';
+      navHint.style.opacity = '0';
+    }
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault(); show(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault(); show(current - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault(); show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); show(total - 1);
+    }
+  });
+
+  var touchX = 0;
+  document.addEventListener('touchstart', function(e) { touchX = e.changedTouches[0].screenX; });
+  document.addEventListener('touchend', function(e) {
+    var d = touchX - e.changedTouches[0].screenX;
+    if (Math.abs(d) > 50) show(d > 0 ? current + 1 : current - 1);
+  });
+
+  // Click navigation — skip if clicking an image or lightbox is open
+  document.addEventListener('click', function(e) {
+    var lb = document.getElementById('lightbox');
+    if (lb.classList.contains('open')) return;
+    if (e.target.tagName === 'IMG') return;
+    var x = e.clientX / window.innerWidth;
+    if (x > 0.85) show(current + 1);
+    else if (x < 0.15) show(current - 1);
+  });
+})();
+
+// ===== Lightbox =====
+(function() {
+  var lightbox = document.getElementById('lightbox');
+  var lbImg = document.getElementById('lightbox-img');
+
+  // Open: click any screenshot image
+  document.querySelectorAll('.screenshot, .screenshot-sm').forEach(function(img) {
+    img.addEventListener('click', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      lbImg.src = img.src;
+      lightbox.classList.add('open');
+    });
+  });
+
+  // Close: click anywhere on lightbox
+  lightbox.addEventListener('click', function(e) {
+    e.stopPropagation();
+    lightbox.classList.remove('open');
+  });
+
+  // Close: Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && lightbox.classList.contains('open')) {
+      e.stopPropagation();
+      lightbox.classList.remove('open');
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

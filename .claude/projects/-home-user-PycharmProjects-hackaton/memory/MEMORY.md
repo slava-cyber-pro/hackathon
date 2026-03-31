@@ -1,0 +1,3 @@
+- [BudgetSphere project](project_budgetsphere.md) — collaborative financial tracking PWA; FastAPI + React + Postgres + Redis, Dockerized
+- [Stateless JWT auth](feedback_auth_stateless.md) — no token storage in Redis/DB; no analytics caching, always fresh DB queries
+- [Stitch design project](reference_stitch.md) — project ID 856316659758754517, 15 screens (9 desktop + 6 mobile), design system asset ID

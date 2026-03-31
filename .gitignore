@@ -1,0 +1,42 @@
+# ─── Environment ───
+.env
+!.env.example
+
+# ─── Python ───
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+*.egg
+
+# ─── Node ───
+node_modules/
+frontend/dist/
+frontend/coverage/
+*.tsbuildinfo
+
+# ─── IDE ───
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ─── Docker ───
+docker-compose.override.yml
+
+# ─── OS ───
+.DS_Store
+Thumbs.db
+
+# ─── Playwright ───
+frontend/test-results/
+frontend/playwright-report/
